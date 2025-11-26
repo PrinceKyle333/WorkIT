@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "528692318818",
+    "project_id": "workit-fbf5d",
+    "storage_bucket": "workit-fbf5d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:528692318818:android:53b1f08978592cebd4b73b",
+        "android_client_info": {
+          "package_name": "com.example.workit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADmzqH4qb7seEpGMrIclMfwfmb3hPGfy8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:528692318818:android:c64dc06fc592ab9cd4b73b",
+        "android_client_info": {
+          "package_name": "com.workit.workit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADmzqH4qb7seEpGMrIclMfwfmb3hPGfy8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
