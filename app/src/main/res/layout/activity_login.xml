@@ -9,16 +9,9 @@
     <FrameLayout
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:background="@drawable/bg_circle_white"
+        android:background="@mipmap/workit_logo"
         android:layout_marginBottom="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Logo"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_gravity="center" />
     </FrameLayout>
 
     <TextView
