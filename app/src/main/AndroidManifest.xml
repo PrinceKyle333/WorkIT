@@ -28,6 +28,13 @@
         </activity>
 
         <activity
+            android:name=".auth.StudentAuthActivity"
+            android:exported="true" />
+
+        <activity
+            android:name=".auth.EmployerAuthActivity"
+            android:exported="true" />
+        <activity
             android:name=".MainActivity"
             android:exported="true" />
     </application>

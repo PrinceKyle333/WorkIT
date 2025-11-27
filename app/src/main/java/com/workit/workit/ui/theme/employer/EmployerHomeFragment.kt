@@ -1,4 +1,4 @@
-package com.workit.workit.ui.theme.student
+package com.workit.workit.ui.theme.employer
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,28 +6,26 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.workit.workit.R
-import com.workit.workit.auth.RoleManager
-import com.workit.workit.data.Job
 import com.workit.workit.adapter.JobAdapter
+import com.workit.workit.data.Job
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.launch
 
-class StudentHomeFragment : Fragment() {
+class EmployerHomeFragment : Fragment() {
     private lateinit var jobsRecyclerView: RecyclerView
     private lateinit var jobAdapter: JobAdapter
     private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_student_home, container, false)
+        return inflater.inflate(R.layout.fragment_employer_home, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -36,24 +34,18 @@ class StudentHomeFragment : Fragment() {
         jobsRecyclerView = view.findViewById(R.id.jobs_recycler_view)
         jobsRecyclerView.layoutManager = LinearLayoutManager(context)
         jobAdapter = JobAdapter(emptyList()) { job ->
-            // Navigate to job details
-            val bundle = Bundle().apply {
-                putSerializable("job", job)
-            }
-            findNavController().navigate(R.id.action_nav_home_to_job_details, bundle)
+            // Handle job click - maybe edit or view details
         }
         jobsRecyclerView.adapter = jobAdapter
 
-        lifecycleScope.launch {
-            if (RoleManager.hasPrivilege(RoleManager.StudentPrivileges.VIEW_JOBS)) {
-                loadJobs()
-            }
-        }
+        loadEmployerJobs()
     }
 
-    private fun loadJobs() {
+    private fun loadEmployerJobs() {
+        val employerId = auth.currentUser?.uid ?: return
+
         db.collection("jobs")
-            .whereEqualTo("status", "active")
+            .whereEqualTo("employerId", employerId)
             .orderBy("postedAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
             .addSnapshotListener { documents, error ->
                 if (error != null) {
@@ -73,7 +65,8 @@ class StudentHomeFragment : Fragment() {
                             requirements = doc.get("requirements") as? List<String> ?: emptyList(),
                             imageUrl = doc.getString("imageUrl") ?: "",
                             postedAt = doc.getLong("postedAt") ?: 0L,
-                            employerId = doc.getString("employerId") ?: ""
+                            employerId = doc.getString("employerId") ?: "",
+                            status = doc.getString("status") ?: "active"
                         )
                     } catch (e: Exception) {
                         null

@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="24dp"
-    android:background="@drawable/gradient_blue">
+    android:background="@color/dark_green">
 
     <FrameLayout
         android:layout_width="64dp"

@@ -1,87 +1,112 @@
-<!-- File: res/layout/fragment_employer_offer.xml -->
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="@color/white">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Post a New Job"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="24dp" />
+
+            <FrameLayout
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:background="@drawable/bg_circle_gray"
+                android:layout_marginBottom="16dp">
+
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_upload"
+                    android:layout_gravity="center" />
+            </FrameLayout>
+
+            <EditText
+                android:id="@+id/et_position"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="Position"
+                android:background="@drawable/bg_edit_text"
+                android:padding="12dp"
+                android:layout_marginBottom="12dp"
+                android:inputType="text" />
+
+            <EditText
+                android:id="@+id/et_location"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="Location"
+                android:background="@drawable/bg_edit_text"
+                android:padding="12dp"
+                android:layout_marginBottom="12dp"
+                android:inputType="text" />
+
+            <EditText
+                android:id="@+id/et_description"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:hint="Description"
+                android:background="@drawable/bg_edit_text"
+                android:padding="12dp"
+                android:layout_marginBottom="12dp"
+                android:gravity="top"
+                android:inputType="textMultiLine" />
+
+            <EditText
+                android:id="@+id/et_requirements"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:hint="Requirements (comma separated)"
+                android:background="@drawable/bg_edit_text"
+                android:padding="12dp"
+                android:layout_marginBottom="12dp"
+                android:gravity="top"
+                android:inputType="textMultiLine" />
+
+            <EditText
+                android:id="@+id/et_shift"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:hint="Shift"
+                android:background="@drawable/bg_edit_text"
+                android:padding="12dp"
+                android:layout_marginBottom="20dp"
+                android:inputType="text" />
+
+            <Button
+                android:id="@+id/btn_post"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:text="Post Job"
+                android:background="@drawable/bg_btn_green"
+                android:textColor="@color/white"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Floating Action Button (Plus Icon) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_job"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:background="@color/white">
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_add_job"
+        app:backgroundTint="@color/green"
+        android:visibility="gone" />
 
-        <FrameLayout
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:background="@drawable/bg_circle_gray"
-            android:layout_marginBottom="16dp">
-
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/ic_upload"
-                android:layout_gravity="center" />
-        </FrameLayout>
-
-        <EditText
-            android:id="@+id/et_position"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:hint="Position"
-            android:background="@drawable/bg_edit_text"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp"
-            android:inputType="text" />
-
-        <EditText
-            android:id="@+id/et_location"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:hint="Location"
-            android:background="@drawable/bg_edit_text"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp"
-            android:inputType="text" />
-
-        <EditText
-            android:id="@+id/et_description"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:hint="Description"
-            android:background="@drawable/bg_edit_text"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp"
-            android:gravity="top"
-            android:inputType="textMultiLine" />
-
-        <EditText
-            android:id="@+id/et_requirements"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:hint="Requirements (comma separated)"
-            android:background="@drawable/bg_edit_text"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp"
-            android:gravity="top"
-            android:inputType="textMultiLine" />
-
-        <EditText
-            android:id="@+id/et_shift"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:hint="Shift"
-            android:background="@drawable/bg_edit_text"
-            android:padding="12dp"
-            android:layout_marginBottom="20dp"
-            android:inputType="text" />
-
-        <Button
-            android:id="@+id/btn_post"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="Post Job"
-            android:background="@drawable/bg_btn_green"
-            android:textColor="@color/white"
-            android:textStyle="bold" />
-    </LinearLayout>
-</ScrollView>
+</FrameLayout>
