@@ -6,6 +6,7 @@
     <!-- Blue Palette -->
     <color name="blue">#1E88E5</color>
     <color name="blue_dark">#0D47A1</color>
+    <color name="nav_blue">#1976D2</color>
 
     <!-- Green Palette -->
     <color name="green">#4CAF50</color>
@@ -15,8 +16,22 @@
     <color name="gray">#999999</color>
     <color name="light_gray">#F0F0F0</color>
     <color name="gray_bg">#EEEEEE</color>
+    <color name="nav_text_inactive">#757575</color>
 
     <!-- Status Colors -->
     <color name="orange">#FF9800</color>
     <color name="red">#F44336</color>
+    <!-- Your existing colors are likely here (e.g., purple_200, teal_200, etc.) -->
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    
+    <!-- ADD THESE LINES BELOW: -->
+    
+    <!-- Color for the selected/active icon/text (e.g., Primary Blue/Purple) -->
+    <color name="nav_active">#4CFF0C</color>
+    
+    <!-- Color for the unselected/inactive icon/text (e.g., Grey) -->
+    <color name="nav_inactive">#FFFFFF</color>
+
+    <color name="bg">#312B2B</color>
 </resources>

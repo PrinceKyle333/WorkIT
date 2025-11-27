@@ -2,8 +2,38 @@
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
-    android:viewportHeight="24">
-    <path
-        android:fillColor="#000000"
-        android:pathData="M7.58,4.08L6.15,2.65C3.75,4.56 2.24,7.2 2.04,10h2.02c0.2,-2.4 1.37,-4.55 3.12,-6.02zM19.97,10h2.02c-0.2,-2.8 -1.71,-5.44 -4.12,-7.35l-1.42,1.42c1.75,1.48 2.92,3.63 3.12,6.02zM18,11h-0.44c-0.22,-1.44 -1.03,-2.71 -2.19,-3.44v-1.3c0,-1.1 -0.9,-2 -2,-2s-2,0.9 -2,2v1.3c-1.16,0.73 -1.97,2 -2.19,3.44H6c-0.9,0 -1.64,0.77 -1.64,1.73v2.05c0,2.04 1.35,3.74 3,4.3v3.92h0c0,0.83 0.67,1.5 1.5,1.5s1.5,-0.67 1.5,-1.5v0h5v0c0,0.83 0.67,1.5 1.5,1.5s1.5,-0.67 1.5,-1.5v-3.92c1.65,-0.56 3,-2.26 3,-4.3v-2.05c0,-0.96 -0.74,-1.73 -1.64,-1.73z" />
+    android:viewportHeight="24"
+    android:tint="#000000">
+    <group>
+        <!-- Bell Body (Outline) -->
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#000000"
+            android:strokeWidth="1.5"
+            android:pathData="M12 2C12 2 12 2 12 2C8.6 2 6 4.6 6 8V14L4 16H20L18 14V8C18 4.6 15.4 2 12 2Z"
+            android:strokeLineJoin="round" />
+
+        <!-- Bell Ringer/Clapper -->
+        <path
+            android:fillColor="#000000"
+            android:pathData="M12 19L12 21"
+            android:strokeColor="#000000"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"/>
+
+        <!-- Bell Base / Stand -->
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#000000"
+            android:strokeWidth="1.5"
+            android:pathData="M9 16L15 16"
+            android:strokeLineCap="round"/>
+
+        <!-- Ringing Indicator (Optional: small circle for flair) -->
+        <path
+            android:fillColor="#000000"
+            android:pathData="M12 22C12.55 22 13 21.55 13 21C13 20.45 12.55 20 12 20C11.45 20 11 20.45 11 21C11 21.55 11.45 22 12 22Z"/>
+
+    </group>
 </vector>

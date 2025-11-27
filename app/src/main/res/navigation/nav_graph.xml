@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -19,7 +18,7 @@
 
     <fragment
         android:id="@+id/nav_notification"
-        android:name="com.workit.workit.ui.theme.student.StudentMatchFragment" 
+        android:name="com.workit.workit.ui.theme.student.StudentMatchFragment"
         android:label="Notification"
         tools:layout="@layout/fragment_student_match" />
 
