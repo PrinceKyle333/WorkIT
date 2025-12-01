@@ -1,5 +1,6 @@
 [versions]
 agp = "8.13.1"
+cardview = "1.0.0"
 firebaseBomVersion = "34.6.0"
 fragmentKtx = "1.6.1"
 kotlin = "2.0.21"
@@ -12,7 +13,10 @@ kotlinxCoroutinesPlayServices = "1.7.3"
 lifecycleRuntimeKtx = "2.9.4"
 activityCompose = "1.11.0"
 composeBom = "2024.09.00"
+lifecycleRuntimeKtxVersion = "2.6.1"
 picasso = "2.8"
+playServicesLocation = "21.0.1"
+playServicesMaps = "18.2.0"
 recyclerview = "1.3.1"
 material = "1.13.0"
 firebaseAuthKtx = "21.1.0"
@@ -22,8 +26,10 @@ firebaseBom = "33.6.0"
 navigation = "2.8.5"
 
 [libraries]
+androidx-cardview = { module = "androidx.cardview:cardview", version.ref = "cardview" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
+androidx-lifecycle-runtime-ktx-v261 = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtxVersion" }
 androidx-recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx" }
@@ -54,6 +60,8 @@ google-firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigation" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

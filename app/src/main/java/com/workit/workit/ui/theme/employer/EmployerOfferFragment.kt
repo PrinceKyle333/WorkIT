@@ -6,23 +6,26 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Spinner
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.workit.workit.R
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.workit.workit.data.Job
+import com.workit.workit.ui.viewmodel.PostJobUiState
+import com.workit.workit.ui.viewmodel.PostJobViewModel
+import kotlinx.coroutines.launch
 
 class EmployerOfferFragment : Fragment() {
+    private val viewModel: PostJobViewModel by viewModels()
     private lateinit var positionInput: EditText
     private lateinit var locationInput: EditText
     private lateinit var descriptionInput: EditText
     private lateinit var shiftInput: EditText
     private lateinit var requirementsInput: EditText
     private lateinit var postButton: Button
-
-    private val db = FirebaseFirestore.getInstance()
-    private val auth = FirebaseAuth.getInstance()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,6 +45,36 @@ class EmployerOfferFragment : Fragment() {
         requirementsInput = view.findViewById(R.id.et_requirements)
         postButton = view.findViewById(R.id.btn_post)
 
+        // Observe post state
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.postState.collect { state ->
+                    when (state) {
+                        is PostJobUiState.Loading -> {
+                            postButton.isEnabled = false
+                            postButton.text = "Posting..."
+                        }
+                        is PostJobUiState.Success -> {
+                            Toast.makeText(context, "Job posted successfully!", Toast.LENGTH_SHORT).show()
+                            clearForm()
+                            viewModel.resetState()
+                            postButton.isEnabled = true
+                            postButton.text = "Post Job"
+                        }
+                        is PostJobUiState.Error -> {
+                            showError(state.message)
+                            postButton.isEnabled = true
+                            postButton.text = "Post Job"
+                        }
+                        is PostJobUiState.Idle -> {
+                            postButton.isEnabled = true
+                            postButton.text = "Post Job"
+                        }
+                    }
+                }
+            }
+        }
+
         postButton.setOnClickListener {
             postJobOffer()
         }
@@ -54,33 +87,15 @@ class EmployerOfferFragment : Fragment() {
         val shift = shiftInput.text.toString().trim()
         val requirements = requirementsInput.text.toString().split(",").map { it.trim() }
 
-        if (position.isEmpty() || location.isEmpty()) {
-            Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val employerId = auth.currentUser?.uid ?: return
-        val jobData = mapOf(
-            "employer" to auth.currentUser?.email.orEmpty(),
-            "employerId" to employerId,
-            "position" to position,
-            "location" to location,
-            "description" to description,
-            "shift" to shift,
-            "requirements" to requirements,
-            "status" to "active",
-            "postedAt" to System.currentTimeMillis()
+        val job = Job(
+            position = position,
+            location = location,
+            description = description,
+            shift = shift,
+            requirements = requirements
         )
 
-        db.collection("jobs")
-            .add(jobData)
-            .addOnSuccessListener {
-                Toast.makeText(context, "Job posted successfully!", Toast.LENGTH_SHORT).show()
-                clearForm()
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(context, "Error posting job: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
+        viewModel.postJob(job)
     }
 
     private fun clearForm() {
@@ -89,5 +104,9 @@ class EmployerOfferFragment : Fragment() {
         descriptionInput.text.clear()
         shiftInput.text.clear()
         requirementsInput.text.clear()
+    }
+
+    private fun showError(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 }

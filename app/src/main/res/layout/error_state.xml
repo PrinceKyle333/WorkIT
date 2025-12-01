@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp">
+
+    <!-- Error Icon -->
+    <FrameLayout
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="@drawable/bg_circle_gray"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="!"
+            android:textSize="32sp"
+            android:textColor="@color/red"
+            android:gravity="center"
+            android:textStyle="bold" />
+    </FrameLayout>
+
+    <!-- Error Title -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Oops! Something Went Wrong"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:layout_marginBottom="8dp"
+        android:gravity="center" />
+
+    <!-- Error Message -->
+    <TextView
+        android:id="@+id/tv_error_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="An error occurred. Please try again."
+        android:textSize="14sp"
+        android:textColor="@color/gray"
+        android:layout_marginBottom="24dp"
+        android:gravity="center"
+        android:lineSpacingMultiplier="1.3" />
+
+    <!-- Retry Button -->
+    <Button
+        android:id="@+id/btn_retry_error"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Try Again"
+        android:background="@drawable/bg_btn_green"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Back Button -->
+    <Button
+        android:id="@+id/btn_back_error"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Go Back"
+        android:background="@drawable/bg_btn_white"
+        android:textColor="@color/green"
+        android:textStyle="bold" />
+</LinearLayout>

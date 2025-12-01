@@ -7,9 +7,7 @@ plugins {
 
 android {
     namespace = "com.workit.workit"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.workit.workit"
@@ -75,6 +73,12 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.play.services)
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
+    implementation(libs.androidx.lifecycle.runtime.ktx.v261)
 
+    // Google Maps
+    implementation(libs.play.services.maps)
+    implementation(libs.play.services.location)
+
+    // CardView for expandable items
+    implementation(libs.androidx.cardview)
 }

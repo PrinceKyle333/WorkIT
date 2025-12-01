@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -14,7 +15,7 @@
         android:id="@+id/nav_post_job"
         android:name="com.workit.workit.ui.theme.employer.EmployerOfferFragment"
         android:label="Post Job"
-        tools:layout="@layout/fragment_employer_offer" />
+        tools:layout="@layout/fragment_employer_offer_enhanced" />
 
     <fragment
         android:id="@+id/nav_employer_match"

@@ -6,21 +6,23 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.workit.workit.R
-import com.workit.workit.auth.RoleManager
-import com.workit.workit.data.Job
 import com.workit.workit.adapter.JobAdapter
-import com.google.firebase.firestore.FirebaseFirestore
+import com.workit.workit.ui.viewmodel.JobsUiState
+import com.workit.workit.ui.viewmodel.JobsViewModel
 import kotlinx.coroutines.launch
 
 class StudentHomeFragment : Fragment() {
+    private val viewModel: JobsViewModel by viewModels()
     private lateinit var jobsRecyclerView: RecyclerView
     private lateinit var jobAdapter: JobAdapter
-    private val db = FirebaseFirestore.getInstance()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,8 +37,8 @@ class StudentHomeFragment : Fragment() {
 
         jobsRecyclerView = view.findViewById(R.id.jobs_recycler_view)
         jobsRecyclerView.layoutManager = LinearLayoutManager(context)
+
         jobAdapter = JobAdapter(emptyList()) { job ->
-            // Navigate to job details
             val bundle = Bundle().apply {
                 putSerializable("job", job)
             }
@@ -44,43 +46,39 @@ class StudentHomeFragment : Fragment() {
         }
         jobsRecyclerView.adapter = jobAdapter
 
-        lifecycleScope.launch {
-            if (RoleManager.hasPrivilege(RoleManager.StudentPrivileges.VIEW_JOBS)) {
-                loadJobs()
+        // Observe UI state
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    when (state) {
+                        is JobsUiState.Loading -> showLoading()
+                        is JobsUiState.Success -> {
+                            hideLoading()
+                            jobAdapter.updateJobs(state.jobs)
+                        }
+
+                        is JobsUiState.Error -> {
+                            hideLoading()
+                            showError(state.message)
+                        }
+                    }
+                }
             }
         }
+
+        // Load initial jobs
+        viewModel.loadJobs()
     }
 
-    private fun loadJobs() {
-        db.collection("jobs")
-            .whereEqualTo("status", "active")
-            .orderBy("postedAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
-            .addSnapshotListener { documents, error ->
-                if (error != null) {
-                    Toast.makeText(context, "Error loading jobs: ${error.message}", Toast.LENGTH_SHORT).show()
-                    return@addSnapshotListener
-                }
+    private fun showLoading() {
+        // Show loading indicator
+    }
 
-                val jobs = documents?.mapNotNull { doc ->
-                    try {
-                        Job(
-                            id = doc.id,
-                            employer = doc.getString("employer") ?: "",
-                            position = doc.getString("position") ?: "",
-                            location = doc.getString("location") ?: "",
-                            shift = doc.getString("shift") ?: "",
-                            description = doc.getString("description") ?: "",
-                            requirements = doc.get("requirements") as? List<String> ?: emptyList(),
-                            imageUrl = doc.getString("imageUrl") ?: "",
-                            postedAt = doc.getLong("postedAt") ?: 0L,
-                            employerId = doc.getString("employerId") ?: ""
-                        )
-                    } catch (e: Exception) {
-                        null
-                    }
-                } ?: emptyList()
+    private fun hideLoading() {
+        // Hide loading indicator
+    }
 
-                jobAdapter.updateJobs(jobs)
-            }
+    private fun showError(message: String) {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 }
