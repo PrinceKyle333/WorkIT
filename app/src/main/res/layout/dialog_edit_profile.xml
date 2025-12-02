@@ -31,25 +31,6 @@
             android:textColorHint="@color/gray" />
 
         <!-- Email Input -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Email"
-            android:textSize="12sp"
-            android:textColor="@color/gray"
-            android:layout_marginBottom="4dp" />
-
-        <EditText
-            android:id="@+id/et_edit_email"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:hint="Enter email"
-            android:background="@drawable/bg_edit_text"
-            android:padding="12dp"
-            android:layout_marginBottom="16dp"
-            android:inputType="textEmailAddress"
-            android:textColor="@color/black"
-            android:textColorHint="@color/gray" />
 
         <!-- Phone Input -->
         <TextView

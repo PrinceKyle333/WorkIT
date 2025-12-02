@@ -22,19 +22,6 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="24dp" />
 
-            <FrameLayout
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:background="@drawable/bg_circle_gray"
-                android:layout_marginBottom="16dp">
-
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:src="@drawable/ic_upload"
-                    android:layout_gravity="center" />
-            </FrameLayout>
-
             <EditText
                 android:id="@+id/et_position"
                 android:layout_width="match_parent"

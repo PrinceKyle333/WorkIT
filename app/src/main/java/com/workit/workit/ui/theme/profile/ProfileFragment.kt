@@ -110,13 +110,11 @@ class ProfileFragment : Fragment() {
     private fun showEditDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_profile, null)
         val etName = dialogView.findViewById<android.widget.EditText>(R.id.et_edit_name)
-        val etEmail = dialogView.findViewById<android.widget.EditText>(R.id.et_edit_email)
         val etPhone = dialogView.findViewById<android.widget.EditText>(R.id.et_edit_phone)
         val etLocation = dialogView.findViewById<android.widget.EditText>(R.id.et_edit_location)
 
         // Pre-fill current values from Firebase
         etName.setText(tvDisplayName.text)
-        etEmail.setText(tvDisplayEmail.text)
         etPhone.setText(if (tvPhoneValue.text == "Not set") "" else tvPhoneValue.text)
         etLocation.setText(if (tvDisplayLocation.text == "Location not set") "" else tvDisplayLocation.text)
 
@@ -126,7 +124,6 @@ class ProfileFragment : Fragment() {
             .setPositiveButton("Save") { _, _ ->
                 saveProfileToFirebase(
                     etName.text.toString().trim(),
-                    etEmail.text.toString().trim(),
                     etPhone.text.toString().trim(),
                     etLocation.text.toString().trim()
                 )
@@ -135,7 +132,7 @@ class ProfileFragment : Fragment() {
             .show()
     }
 
-    private fun saveProfileToFirebase(name: String, email: String, phone: String, location: String) {
+    private fun saveProfileToFirebase(name: String, phone: String, location: String) {
         val userId = auth.currentUser?.uid ?: return
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -146,7 +143,6 @@ class ProfileFragment : Fragment() {
                     RoleManager.UserRole.STUDENT -> {
                         val updates = hashMapOf<String, Any>(
                             "name" to name,
-                            "email" to email,
                             "phone" to phone,
                             "address" to location
                         )
@@ -155,7 +151,6 @@ class ProfileFragment : Fragment() {
                     RoleManager.UserRole.EMPLOYER -> {
                         val updates = hashMapOf<String, Any>(
                             "companyName" to name,
-                            "email" to email,
                             "phone" to phone,
                             "address" to location
                         )
@@ -164,15 +159,6 @@ class ProfileFragment : Fragment() {
                     else -> {
                         showError("Unknown user type")
                         return@launch
-                    }
-                }
-
-                // Update Firebase Auth email if changed
-                if (email != auth.currentUser?.email) {
-                    try {
-                        auth.currentUser?.updateEmail(email)?.await()
-                    } catch (e: Exception) {
-                        showError("Email updated in profile but authentication failed: ${e.message}")
                     }
                 }
 
