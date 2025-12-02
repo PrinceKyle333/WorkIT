@@ -1,9 +1,11 @@
 package com.workit.workit.data.repository
 
+import android.net.Uri
 import com.workit.workit.data.Match
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -11,6 +13,7 @@ import kotlinx.coroutines.withContext
 class MatchRepository {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private val storage = FirebaseStorage.getInstance()
 
     suspend fun getStudentMatches(studentId: String): Result<List<Match>> = withContext(Dispatchers.IO) {
         return@withContext try {
@@ -80,6 +83,30 @@ class MatchRepository {
             }
             db.collection("matches").document(matchId).update("status", status).await()
             Result.Success(Unit)
+        } catch (e: Exception) {
+            Result.Error(e as Exception)
+        }
+    }
+
+    suspend fun downloadDocument(matchId: String, documentType: String): Result<Uri> = withContext(Dispatchers.IO) {
+        return@withContext try {
+            val storageRef = storage.reference
+                .child("applications")
+                .child(matchId)
+                .child(documentType)
+
+            val downloadUrl = storageRef.downloadUrl.await()
+            Result.Success(downloadUrl)
+        } catch (e: Exception) {
+            Result.Error(e as Exception)
+        }
+    }
+
+    suspend fun getMatchDocuments(matchId: String): Result<Map<String, Any>> = withContext(Dispatchers.IO) {
+        return@withContext try {
+            val doc = db.collection("matches").document(matchId).get().await()
+            val documents = doc.get("documents") as? Map<String, Any> ?: emptyMap()
+            Result.Success(documents)
         } catch (e: Exception) {
             Result.Error(e as Exception)
         }

@@ -1,4 +1,3 @@
-
 package com.workit.workit.data
 
 import com.google.firebase.firestore.DocumentId
@@ -13,9 +12,18 @@ data class Job(
     val shift: String = "",
     val shiftStart: String = "",
     val shiftEnd: String = "",
+    val shiftStartHour: Int = 0,
+    val shiftStartMinute: Int = 0,
+    val shiftEndHour: Int = 0,
+    val shiftEndMinute: Int = 0,
     val workDays: List<String> = emptyList(),
     val description: String = "",
-    val requirements: List<String> = emptyList(),
+    // Requirements are ALWAYS these 3 documents
+    val requirements: List<String> = listOf(
+        "Resume (PDF)",
+        "Certificate of Registration (COR) (PDF)",
+        "Application Letter (PDF)"
+    ),
     val imageUrl: String = "",
     val postedAt: Long = 0L,
     val employerId: String = "",

@@ -14,6 +14,7 @@
             android:padding="16dp"
             android:background="@color/white">
 
+            <!-- Title -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -22,58 +23,296 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="24dp" />
 
+            <!-- Position Input -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Position *"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:textColor="@color/gray"
+                android:layout_marginBottom="4dp" />
+
             <EditText
                 android:id="@+id/et_position"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:hint="Position"
+                android:hint="e.g. Software Developer"
                 android:background="@drawable/bg_edit_text"
                 android:padding="12dp"
                 android:layout_marginBottom="12dp"
-                android:inputType="text" />
+                android:inputType="text"
+                android:textColor="@color/black"
+                android:textColorHint="@color/gray" />
+
+            <!-- Location Input -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Location *"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:textColor="@color/gray"
+                android:layout_marginBottom="4dp" />
 
             <EditText
                 android:id="@+id/et_location"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:hint="Location"
+                android:hint="e.g. Manila, Philippines"
                 android:background="@drawable/bg_edit_text"
                 android:padding="12dp"
                 android:layout_marginBottom="12dp"
-                android:inputType="text" />
+                android:inputType="text"
+                android:textColor="@color/black"
+                android:textColorHint="@color/gray" />
+
+            <!-- Description Input -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Description *"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:textColor="@color/gray"
+                android:layout_marginBottom="4dp" />
 
             <EditText
                 android:id="@+id/et_description"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
-                android:hint="Description"
+                android:hint="Job description (min. 20 characters)"
                 android:background="@drawable/bg_edit_text"
                 android:padding="12dp"
-                android:layout_marginBottom="12dp"
+                android:layout_marginBottom="16dp"
                 android:gravity="top"
-                android:inputType="textMultiLine" />
+                android:inputType="textMultiLine"
+                android:textColor="@color/black"
+                android:textColorHint="@color/gray" />
 
-            <EditText
-                android:id="@+id/et_requirements"
+            <!-- Shift Times Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Shift Times"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:layout_marginBottom="8dp" />
+
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:hint="Requirements (comma separated)"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <!-- Shift Start Time -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Start Time *"
+                        android:textStyle="bold"
+                        android:textSize="12sp"
+                        android:textColor="@color/gray"
+                        android:layout_marginBottom="4dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_edit_text"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="12dp">
+
+                        <EditText
+                            android:id="@+id/et_shift_start"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:hint="09:00"
+                            android:textSize="16sp"
+                            android:textColor="@color/black"
+                            android:textColorHint="@color/gray"
+                            android:background="@android:color/transparent"
+                            android:focusable="false"
+                            android:cursorVisible="false"
+                            android:inputType="none" />
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:tint="@color/green"
+                            android:scaleType="centerInside" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Shift End Time -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="End Time *"
+                        android:textStyle="bold"
+                        android:textSize="12sp"
+                        android:textColor="@color/gray"
+                        android:layout_marginBottom="4dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_edit_text"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="12dp">
+
+                        <EditText
+                            android:id="@+id/et_shift_end"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:hint="17:00"
+                            android:textSize="16sp"
+                            android:textColor="@color/black"
+                            android:textColorHint="@color/gray"
+                            android:background="@android:color/transparent"
+                            android:focusable="false"
+                            android:cursorVisible="false"
+                            android:inputType="none" />
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:scaleType="centerInside" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Required Documents Section (Fixed - Not Editable) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Required Documents"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Document 1: Resume -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
                 android:background="@drawable/bg_edit_text"
                 android:padding="12dp"
-                android:layout_marginBottom="12dp"
-                android:gravity="top"
-                android:inputType="textMultiLine" />
+                android:layout_marginBottom="8dp">
 
-            <EditText
-                android:id="@+id/et_shift"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_upload"
+                    android:tint="@color/blue"
+                    android:scaleType="centerInside"
+                    android:layout_marginEnd="12dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Resume (PDF)"
+                    android:textSize="14sp"
+                    android:textColor="@color/black" />
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_upload"
+                    android:tint="@color/green"
+                    android:scaleType="centerInside" />
+            </LinearLayout>
+
+            <!-- Document 2: COR -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:hint="Shift"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
                 android:background="@drawable/bg_edit_text"
                 android:padding="12dp"
-                android:layout_marginBottom="20dp"
-                android:inputType="text" />
+                android:layout_marginBottom="8dp">
 
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_upload"
+                    android:tint="@color/blue"
+                    android:scaleType="centerInside"
+                    android:layout_marginEnd="12dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Certificate of Registration (COR) (PDF)"
+                    android:textSize="14sp"
+                    android:textColor="@color/black" />
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_upload"
+                    android:tint="@color/green"
+                    android:scaleType="centerInside" />
+            </LinearLayout>
+
+            <!-- Document 3: Application Letter -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_edit_text"
+                android:padding="12dp"
+                android:layout_marginBottom="24dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_upload"
+                    android:tint="@color/blue"
+                    android:scaleType="centerInside"
+                    android:layout_marginEnd="12dp" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Application Letter (PDF)"
+                    android:textSize="14sp"
+                    android:textColor="@color/black" />
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_upload"
+                    android:tint="@color/green"
+                    android:scaleType="centerInside" />
+            </LinearLayout>
+
+            <!-- Post Button -->
             <Button
                 android:id="@+id/btn_post"
                 android:layout_width="match_parent"
@@ -81,7 +320,8 @@
                 android:text="Post Job"
                 android:background="@drawable/bg_btn_green"
                 android:textColor="@color/white"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:textSize="16sp" />
         </LinearLayout>
     </ScrollView>
 

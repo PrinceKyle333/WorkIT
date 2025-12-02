@@ -6,15 +6,32 @@
     android:padding="12dp"
     android:layout_margin="8dp">
 
-    <TextView
-        android:id="@+id/tv_applicant_name"
-        android:layout_width="wrap_content"
+    <!-- Applicant Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Student Name"
-        android:textStyle="bold"
-        android:textSize="16sp"
-        android:layout_marginBottom="4dp" />
+        android:orientation="vertical"
+        android:layout_marginBottom="12dp">
 
+        <TextView
+            android:id="@+id/tv_applicant_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Student Name"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/tv_applicant_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="student@email.com"
+            android:textSize="12sp"
+            android:textColor="@color/gray" />
+    </LinearLayout>
+
+    <!-- Status -->
     <TextView
         android:id="@+id/tv_status"
         android:layout_width="wrap_content"
@@ -22,8 +39,134 @@
         android:text="Pending"
         android:textSize="12sp"
         android:textColor="@color/orange"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="12dp"
+        android:textStyle="bold" />
 
+    <!-- Documents Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Documents"
+            android:textSize="12sp"
+            android:textColor="@color/gray"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Resume Document -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_upload"
+                android:tint="@color/blue"
+                android:scaleType="centerInside"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/tv_resume_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Resume.pdf"
+                android:textSize="12sp"
+                android:textColor="@color/black" />
+
+            <Button
+                android:id="@+id/btn_download_resume"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="View"
+                android:textSize="11sp"
+                android:background="@drawable/bg_btn_blue"
+                android:textColor="@color/white"
+                android:paddingHorizontal="12dp" />
+        </LinearLayout>
+
+        <!-- COR Document -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_upload"
+                android:tint="@color/blue"
+                android:scaleType="centerInside"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/tv_cor_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="COR.pdf"
+                android:textSize="12sp"
+                android:textColor="@color/black" />
+
+            <Button
+                android:id="@+id/btn_download_cor"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="View"
+                android:textSize="11sp"
+                android:background="@drawable/bg_btn_blue"
+                android:textColor="@color/white"
+                android:paddingHorizontal="12dp" />
+        </LinearLayout>
+
+        <!-- Application Letter Document -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_upload"
+                android:tint="@color/blue"
+                android:scaleType="centerInside"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/tv_application_letter_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="ApplicationLetter.pdf"
+                android:textSize="12sp"
+                android:textColor="@color/black" />
+
+            <Button
+                android:id="@+id/btn_download_application_letter"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="View"
+                android:textSize="11sp"
+                android:background="@drawable/bg_btn_blue"
+                android:textColor="@color/white"
+                android:paddingHorizontal="12dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Action Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
