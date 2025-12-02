@@ -3,12 +3,13 @@ package com.workit.workit.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.workit.workit.data.Job
-import com.workit.workit.data.repository.JobRepository
-import com.workit.workit.data.repository.Result
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 sealed class JobsUiState {
     object Loading : JobsUiState()
@@ -17,7 +18,7 @@ sealed class JobsUiState {
 }
 
 class JobsViewModel : ViewModel() {
-    private val repository = JobRepository()
+    private val db = FirebaseFirestore.getInstance()
 
     private val _uiState = MutableStateFlow<JobsUiState>(JobsUiState.Loading)
     val uiState: StateFlow<JobsUiState> = _uiState.asStateFlow()
@@ -28,46 +29,53 @@ class JobsViewModel : ViewModel() {
     private val _searchResults = MutableStateFlow<List<Job>>(emptyList())
     val searchResults: StateFlow<List<Job>> = _searchResults.asStateFlow()
 
-    private var currentPage = 0
-    private var allJobs = mutableListOf<Job>()
-
     init {
         loadJobs()
     }
 
     fun loadJobs() {
         viewModelScope.launch {
-            _uiState.value = JobsUiState.Loading
-            currentPage = 0
-            allJobs.clear()
-            repository.resetPagination()
+            try {
+                _uiState.value = JobsUiState.Loading
 
-            when (val result = repository.getActiveJobs(0)) {
-                is Result.Success -> {
-                    allJobs.addAll(result.data)
-                    _uiState.value = JobsUiState.Success(allJobs.toList(), result.data.size == 10)
-                }
-                is Result.Error -> {
-                    _uiState.value = JobsUiState.Error(result.exception.message ?: "Unknown error")
-                }
-                is Result.Loading -> {}
-            }
-        }
-    }
+                val snapshot = db.collection("jobs")
+                    .whereEqualTo("status", "active")
+                    .orderBy("postedAt", Query.Direction.DESCENDING)
+                    .get()
+                    .await()
 
-    fun loadMoreJobs() {
-        viewModelScope.launch {
-            currentPage++
-            when (val result = repository.getActiveJobs(currentPage)) {
-                is Result.Success -> {
-                    allJobs.addAll(result.data)
-                    _uiState.value = JobsUiState.Success(allJobs.toList(), result.data.size == 10)
+                val jobs = snapshot.documents.mapNotNull { doc ->
+                    try {
+                        Job(
+                            id = doc.id,
+                            employer = doc.getString("employer") ?: "",
+                            employerId = doc.getString("employerId") ?: "",
+                            position = doc.getString("position") ?: "",
+                            location = doc.getString("location") ?: "",
+                            shift = doc.getString("shift") ?: "",
+                            shiftStart = doc.getString("shiftStart") ?: "",
+                            shiftEnd = doc.getString("shiftEnd") ?: "",
+                            workDays = doc.get("workDays") as? List<String> ?: emptyList(),
+                            description = doc.getString("description") ?: "",
+                            requirements = doc.get("requirements") as? List<String> ?: emptyList(),
+                            imageUrl = doc.getString("imageUrl") ?: "",
+                            postedAt = doc.getLong("postedAt") ?: System.currentTimeMillis(),
+                            status = doc.getString("status") ?: "active",
+                            latitude = doc.getDouble("latitude") ?: 0.0,
+                            longitude = doc.getDouble("longitude") ?: 0.0
+                        )
+                    } catch (e: Exception) {
+                        android.util.Log.e("JobsViewModel", "Error parsing job", e)
+                        null
+                    }
                 }
-                is Result.Error -> {
-                    currentPage--
-                    _uiState.value = JobsUiState.Error(result.exception.message ?: "Failed to load more jobs")
-                }
-                is Result.Loading -> {}
+
+                android.util.Log.d("JobsViewModel", "Loaded ${jobs.size} jobs")
+                _uiState.value = JobsUiState.Success(jobs)
+
+            } catch (e: Exception) {
+                android.util.Log.e("JobsViewModel", "Error loading jobs", e)
+                _uiState.value = JobsUiState.Error(e.message ?: "Unknown error")
             }
         }
     }
@@ -81,14 +89,46 @@ class JobsViewModel : ViewModel() {
         }
 
         viewModelScope.launch {
-            when (val result = repository.searchJobs(query, location)) {
-                is Result.Success -> {
-                    _searchResults.value = result.data
+            try {
+                val snapshot = db.collection("jobs")
+                    .whereEqualTo("status", "active")
+                    .get()
+                    .await()
+
+                val jobs = snapshot.documents.mapNotNull { doc ->
+                    try {
+                        Job(
+                            id = doc.id,
+                            employer = doc.getString("employer") ?: "",
+                            employerId = doc.getString("employerId") ?: "",
+                            position = doc.getString("position") ?: "",
+                            location = doc.getString("location") ?: "",
+                            shift = doc.getString("shift") ?: "",
+                            shiftStart = doc.getString("shiftStart") ?: "",
+                            shiftEnd = doc.getString("shiftEnd") ?: "",
+                            workDays = doc.get("workDays") as? List<String> ?: emptyList(),
+                            description = doc.getString("description") ?: "",
+                            requirements = doc.get("requirements") as? List<String> ?: emptyList(),
+                            imageUrl = doc.getString("imageUrl") ?: "",
+                            postedAt = doc.getLong("postedAt") ?: System.currentTimeMillis(),
+                            status = doc.getString("status") ?: "active",
+                            latitude = doc.getDouble("latitude") ?: 0.0,
+                            longitude = doc.getDouble("longitude") ?: 0.0
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
+                }.filter { job ->
+                    val matchesQuery = job.position.contains(query, ignoreCase = true) ||
+                            job.description.contains(query, ignoreCase = true) ||
+                            job.employer.contains(query, ignoreCase = true)
+                    val matchesLocation = location.isEmpty() || job.location.contains(location, ignoreCase = true)
+                    matchesQuery && matchesLocation
                 }
-                is Result.Error -> {
-                    _searchResults.value = emptyList()
-                }
-                is Result.Loading -> {}
+
+                _searchResults.value = jobs
+            } catch (e: Exception) {
+                _searchResults.value = emptyList()
             }
         }
     }
