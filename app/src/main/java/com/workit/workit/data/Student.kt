@@ -3,6 +3,12 @@ package com.workit.workit.data
 import com.google.firebase.firestore.DocumentId
 import java.io.Serializable
 
+data class TimeSlot(
+    val day: String = "",
+    val startTime: String = "",
+    val endTime: String = ""
+) : Serializable
+
 data class Student(
     @DocumentId
     val id: String = "",
@@ -14,5 +20,6 @@ data class Student(
     val username: String = "",
     val profilePictureUrl: String = "",
     val createdAt: Long = 0L,
-    val appliedJobs: List<String> = emptyList()
+    val appliedJobs: List<String> = emptyList(),
+    val vacantSchedule: List<TimeSlot> = emptyList() // NEW: Student's available time slots
 ) : Serializable

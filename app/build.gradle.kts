@@ -56,6 +56,8 @@ dependencies {
     implementation(libs.google.firebase.storage.ktx)
     implementation(platform(libs.google.firebase.bom))
     implementation(libs.firebase.analytics)
+    implementation(libs.navigation.fragment.ktx)
+    implementation(libs.navigation.ui.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
