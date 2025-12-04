@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- File: app/src/main/res/layout/activity_student_auth.xml -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -26,11 +25,129 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Student Login"
+            android:text="Student Sign Up"
             android:textSize="28sp"
             android:textStyle="bold"
             android:textColor="@color/white"
             android:layout_marginBottom="32dp" />
+
+        <!-- Name Fields Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <!-- First Name -->
+            <EditText
+                android:id="@+id/et_first_name"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:hint="First Name"
+                android:background="@drawable/bg_edit_text"
+                android:padding="12dp"
+                android:layout_marginEnd="6dp"
+                android:inputType="textPersonName"
+                android:textColor="@color/black"
+                android:textColorHint="@color/gray"
+                android:visibility="gone" />
+
+            <!-- Middle Name -->
+            <EditText
+                android:id="@+id/et_middle_name"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:hint="Middle Name"
+                android:background="@drawable/bg_edit_text"
+                android:padding="12dp"
+                android:layout_marginStart="6dp"
+                android:inputType="textPersonName"
+                android:textColor="@color/black"
+                android:textColorHint="@color/gray"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Last Name and Ext Name Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <!-- Last Name -->
+            <EditText
+                android:id="@+id/et_last_name"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="2"
+                android:hint="Last Name"
+                android:background="@drawable/bg_edit_text"
+                android:padding="12dp"
+                android:layout_marginEnd="6dp"
+                android:inputType="textPersonName"
+                android:textColor="@color/black"
+                android:textColorHint="@color/gray"
+                android:visibility="gone" />
+
+            <!-- Ext. Name -->
+            <EditText
+                android:id="@+id/et_ext_name"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:hint="Ext."
+                android:background="@drawable/bg_edit_text"
+                android:padding="12dp"
+                android:layout_marginStart="6dp"
+                android:inputType="text"
+                android:textColor="@color/black"
+                android:textColorHint="@color/gray"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- IP Number -->
+        <EditText
+            android:id="@+id/et_ip_number"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="IP Number"
+            android:background="@drawable/bg_edit_text"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:inputType="text"
+            android:textColor="@color/black"
+            android:textColorHint="@color/gray"
+            android:visibility="gone" />
+
+        <!-- Program -->
+        <EditText
+            android:id="@+id/et_program"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="Program"
+            android:background="@drawable/bg_edit_text"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:inputType="text"
+            android:textColor="@color/black"
+            android:textColorHint="@color/gray"
+            android:visibility="gone" />
+
+        <!-- Username -->
+        <EditText
+            android:id="@+id/et_username"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="Username"
+            android:background="@drawable/bg_edit_text"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:inputType="text"
+            android:textColor="@color/black"
+            android:textColorHint="@color/gray"
+            android:visibility="gone" />
 
         <!-- Email Input -->
         <EditText
@@ -45,6 +162,20 @@
             android:textColor="@color/black"
             android:textColorHint="@color/gray" />
 
+        <!-- Address -->
+        <EditText
+            android:id="@+id/et_address"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="Address"
+            android:background="@drawable/bg_edit_text"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:inputType="textPostalAddress"
+            android:textColor="@color/black"
+            android:textColorHint="@color/gray"
+            android:visibility="gone" />
+
         <!-- Password Input -->
         <EditText
             android:id="@+id/et_password"
@@ -57,20 +188,6 @@
             android:inputType="textPassword"
             android:textColor="@color/black"
             android:textColorHint="@color/gray" />
-
-        <!-- Name Input (for signup) -->
-        <EditText
-            android:id="@+id/et_name"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:hint="Full Name"
-            android:background="@drawable/bg_edit_text"
-            android:padding="12dp"
-            android:layout_marginBottom="12dp"
-            android:inputType="text"
-            android:textColor="@color/black"
-            android:textColorHint="@color/gray"
-            android:visibility="gone" />
 
         <!-- Vacant Schedule Section (for signup) -->
         <LinearLayout

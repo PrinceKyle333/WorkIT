@@ -5,27 +5,21 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.workit.workit.LoginActivity
 import com.workit.workit.R
 import com.workit.workit.auth.RoleManager
-import com.workit.workit.ui.viewmodel.ProfileUiState
-import com.workit.workit.ui.viewmodel.ProfileViewModel
+import com.workit.workit.data.TimeSlot
+import com.workit.workit.ui.theme.custom.CustomTimePickerDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 class ProfileFragment : Fragment() {
-    private val viewModel: ProfileViewModel by viewModels()
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
 
@@ -35,6 +29,22 @@ class ProfileFragment : Fragment() {
     private lateinit var tvPhoneValue: TextView
     private lateinit var btnEdit: Button
     private lateinit var btnLogout: Button
+
+    private val daysOfWeek = arrayOf(
+        "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+    )
+
+    data class TimeSlotView(
+        val view: LinearLayout,
+        val daySpinner: Spinner,
+        val startTimeEdit: EditText,
+        val endTimeEdit: EditText,
+        val removeButton: Button,
+        var startHour: Int = 9,
+        var startMinute: Int = 0,
+        var endHour: Int = 17,
+        var endMinute: Int = 0
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -109,31 +119,218 @@ class ProfileFragment : Fragment() {
 
     private fun showEditDialog() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_edit_profile, null)
-        val etName = dialogView.findViewById<android.widget.EditText>(R.id.et_edit_name)
-        val etPhone = dialogView.findViewById<android.widget.EditText>(R.id.et_edit_phone)
-        val etLocation = dialogView.findViewById<android.widget.EditText>(R.id.et_edit_location)
 
-        // Pre-fill current values from Firebase
-        etName.setText(tvDisplayName.text)
-        etPhone.setText(if (tvPhoneValue.text == "Not set") "" else tvPhoneValue.text)
-        etLocation.setText(if (tvDisplayLocation.text == "Location not set") "" else tvDisplayLocation.text)
+        // Initialize all fields
+        val etFirstName = dialogView.findViewById<EditText>(R.id.et_edit_first_name)
+        val etMiddleName = dialogView.findViewById<EditText>(R.id.et_edit_middle_name)
+        val etLastName = dialogView.findViewById<EditText>(R.id.et_edit_last_name)
+        val etExtName = dialogView.findViewById<EditText>(R.id.et_edit_ext_name)
+        val etIpNumber = dialogView.findViewById<EditText>(R.id.et_edit_ip_number)
+        val etProgram = dialogView.findViewById<EditText>(R.id.et_edit_program)
+        val etUsername = dialogView.findViewById<EditText>(R.id.et_edit_username)
+        val etPhone = dialogView.findViewById<EditText>(R.id.et_edit_phone)
+        val etLocation = dialogView.findViewById<EditText>(R.id.et_edit_location)
+        val timeSlotsContainer = dialogView.findViewById<LinearLayout>(R.id.edit_time_slots_container)
+        val btnAddTimeSlot = dialogView.findViewById<Button>(R.id.btn_edit_add_time_slot)
 
-        AlertDialog.Builder(requireContext())
+        val timeSlots = mutableListOf<TimeSlotView>()
+
+        // Load current profile data
+        val userId = auth.currentUser?.uid ?: return
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val role = RoleManager.getUserRole()
+
+                if (role == RoleManager.UserRole.STUDENT) {
+                    val doc = db.collection("students").document(userId).get().await()
+
+                    // Pre-fill fields
+                    etFirstName.setText(doc.getString("firstName") ?: "")
+                    etMiddleName.setText(doc.getString("middleName") ?: "")
+                    etLastName.setText(doc.getString("lastName") ?: "")
+                    etExtName.setText(doc.getString("extName") ?: "")
+                    etIpNumber.setText(doc.getString("ipNumber") ?: "")
+                    etProgram.setText(doc.getString("program") ?: "")
+                    etUsername.setText(doc.getString("username") ?: "")
+                    etPhone.setText(doc.getString("phone") ?: "")
+                    etLocation.setText(doc.getString("address") ?: "")
+
+                    // Load existing time slots
+                    val vacantSchedule = doc.get("vacantSchedule") as? List<Map<String, Any>> ?: emptyList()
+                    for (slot in vacantSchedule) {
+                        val day = slot["day"] as? String ?: "Monday"
+                        val startTime = slot["startTime"] as? String ?: "09:00"
+                        val endTime = slot["endTime"] as? String ?: "17:00"
+
+                        addTimeSlotView(timeSlotsContainer, timeSlots, day, startTime, endTime)
+                    }
+
+                    // Add at least one empty slot if none exist
+                    if (timeSlots.isEmpty()) {
+                        addTimeSlotView(timeSlotsContainer, timeSlots)
+                    }
+                }
+            } catch (e: Exception) {
+                showError("Failed to load profile data: ${e.message}")
+            }
+        }
+
+        // Add time slot button listener
+        btnAddTimeSlot.setOnClickListener {
+            addTimeSlotView(timeSlotsContainer, timeSlots)
+        }
+
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Edit Profile")
             .setView(dialogView)
             .setPositiveButton("Save") { _, _ ->
                 saveProfileToFirebase(
-                    etName.text.toString().trim(),
-                    etPhone.text.toString().trim(),
-                    etLocation.text.toString().trim()
+                    etFirstName, etMiddleName, etLastName, etExtName,
+                    etIpNumber, etProgram, etUsername,
+                    etPhone, etLocation, timeSlots
                 )
             }
             .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+
+        dialog.show()
     }
 
-    private fun saveProfileToFirebase(name: String, phone: String, location: String) {
+    private fun addTimeSlotView(
+        container: LinearLayout,
+        timeSlots: MutableList<TimeSlotView>,
+        defaultDay: String = "Monday",
+        defaultStartTime: String = "09:00",
+        defaultEndTime: String = "17:00"
+    ) {
+        val inflater = LayoutInflater.from(requireContext())
+        val timeSlotView = inflater.inflate(R.layout.item_time_slot, container, false) as LinearLayout
+
+        val daySpinner = timeSlotView.findViewById<Spinner>(R.id.spinner_day)
+        val startTimeEdit = timeSlotView.findViewById<EditText>(R.id.et_start_time)
+        val endTimeEdit = timeSlotView.findViewById<EditText>(R.id.et_end_time)
+        val removeButton = timeSlotView.findViewById<Button>(R.id.btn_remove_slot)
+
+        // Setup day spinner
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, daysOfWeek)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        daySpinner.adapter = adapter
+
+        // Set default day
+        val dayIndex = daysOfWeek.indexOf(defaultDay)
+        if (dayIndex >= 0) {
+            daySpinner.setSelection(dayIndex)
+        }
+
+        // Parse times
+        val startParts = defaultStartTime.split(":")
+        val endParts = defaultEndTime.split(":")
+        val startHour = startParts.getOrNull(0)?.toIntOrNull() ?: 9
+        val startMinute = startParts.getOrNull(1)?.toIntOrNull() ?: 0
+        val endHour = endParts.getOrNull(0)?.toIntOrNull() ?: 17
+        val endMinute = endParts.getOrNull(1)?.toIntOrNull() ?: 0
+
+        val slotData = TimeSlotView(
+            view = timeSlotView,
+            daySpinner = daySpinner,
+            startTimeEdit = startTimeEdit,
+            endTimeEdit = endTimeEdit,
+            removeButton = removeButton,
+            startHour = startHour,
+            startMinute = startMinute,
+            endHour = endHour,
+            endMinute = endMinute
+        )
+
+        // Set times
+        updateTimeDisplay(slotData)
+
+        // Setup time pickers
+        startTimeEdit.setOnClickListener {
+            showTimePickerForSlot(slotData, true)
+        }
+
+        endTimeEdit.setOnClickListener {
+            showTimePickerForSlot(slotData, false)
+        }
+
+        // Remove button
+        removeButton.setOnClickListener {
+            container.removeView(timeSlotView)
+            timeSlots.remove(slotData)
+        }
+
+        timeSlots.add(slotData)
+        container.addView(timeSlotView)
+    }
+
+    private fun showTimePickerForSlot(slotData: TimeSlotView, isStartTime: Boolean) {
+        val initialHour = if (isStartTime) slotData.startHour else slotData.endHour
+        val initialMinute = if (isStartTime) slotData.startMinute else slotData.endMinute
+
+        val dialog = CustomTimePickerDialog(
+            requireContext(),
+            initialHour,
+            initialMinute
+        ) { hour, minute ->
+            if (isStartTime) {
+                slotData.startHour = hour
+                slotData.startMinute = minute
+            } else {
+                slotData.endHour = hour
+                slotData.endMinute = minute
+            }
+            updateTimeDisplay(slotData)
+        }
+
+        dialog.show()
+    }
+
+    private fun updateTimeDisplay(slotData: TimeSlotView) {
+        slotData.startTimeEdit.setText(String.format("%02d:%02d", slotData.startHour, slotData.startMinute))
+        slotData.endTimeEdit.setText(String.format("%02d:%02d", slotData.endHour, slotData.endMinute))
+    }
+
+    private fun saveProfileToFirebase(
+        etFirstName: EditText,
+        etMiddleName: EditText,
+        etLastName: EditText,
+        etExtName: EditText,
+        etIpNumber: EditText,
+        etProgram: EditText,
+        etUsername: EditText,
+        etPhone: EditText,
+        etLocation: EditText,
+        timeSlots: List<TimeSlotView>
+    ) {
         val userId = auth.currentUser?.uid ?: return
+
+        val firstName = etFirstName.text.toString().trim()
+        val middleName = etMiddleName.text.toString().trim()
+        val lastName = etLastName.text.toString().trim()
+        val extName = etExtName.text.toString().trim()
+        val ipNumber = etIpNumber.text.toString().trim()
+        val program = etProgram.text.toString().trim()
+        val username = etUsername.text.toString().trim()
+        val phone = etPhone.text.toString().trim()
+        val location = etLocation.text.toString().trim()
+
+        // Construct full name
+        val fullName = buildString {
+            append(firstName)
+            if (middleName.isNotEmpty()) append(" $middleName")
+            append(" $lastName")
+            if (extName.isNotEmpty()) append(" $extName")
+        }
+
+        // Convert time slots to data model
+        val vacantSchedule = timeSlots.map { slot ->
+            mapOf(
+                "day" to slot.daySpinner.selectedItem.toString(),
+                "startTime" to String.format("%02d:%02d", slot.startHour, slot.startMinute),
+                "endTime" to String.format("%02d:%02d", slot.endHour, slot.endMinute)
+            )
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
@@ -142,15 +339,23 @@ class ProfileFragment : Fragment() {
                 when (role) {
                     RoleManager.UserRole.STUDENT -> {
                         val updates = hashMapOf<String, Any>(
-                            "name" to name,
+                            "name" to fullName,
+                            "firstName" to firstName,
+                            "middleName" to middleName,
+                            "lastName" to lastName,
+                            "extName" to extName,
+                            "ipNumber" to ipNumber,
+                            "program" to program,
+                            "username" to username,
                             "phone" to phone,
-                            "address" to location
+                            "address" to location,
+                            "vacantSchedule" to vacantSchedule
                         )
                         db.collection("students").document(userId).update(updates).await()
                     }
                     RoleManager.UserRole.EMPLOYER -> {
                         val updates = hashMapOf<String, Any>(
-                            "companyName" to name,
+                            "companyName" to fullName,
                             "phone" to phone,
                             "address" to location
                         )
@@ -163,8 +368,6 @@ class ProfileFragment : Fragment() {
                 }
 
                 Toast.makeText(context, "Profile updated successfully!", Toast.LENGTH_SHORT).show()
-
-                // Reload profile from Firebase to show updated values
                 loadProfileFromFirebase()
 
             } catch (e: Exception) {

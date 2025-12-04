@@ -25,6 +25,16 @@ class StudentAuthActivity : AppCompatActivity() {
     private lateinit var timeSlotsContainer: LinearLayout
     private lateinit var btnAddTimeSlot: Button
 
+    // New fields
+    private lateinit var etFirstName: EditText
+    private lateinit var etMiddleName: EditText
+    private lateinit var etLastName: EditText
+    private lateinit var etExtName: EditText
+    private lateinit var etIpNumber: EditText
+    private lateinit var etProgram: EditText
+    private lateinit var etUsername: EditText
+    private lateinit var etAddress: EditText
+
     private val daysOfWeek = arrayOf(
         "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
     )
@@ -49,7 +59,17 @@ class StudentAuthActivity : AppCompatActivity() {
 
         val etEmail = findViewById<EditText>(R.id.et_email)
         val etPassword = findViewById<EditText>(R.id.et_password)
-        val etName = findViewById<EditText>(R.id.et_name)
+
+        // Initialize new fields
+        etFirstName = findViewById(R.id.et_first_name)
+        etMiddleName = findViewById(R.id.et_middle_name)
+        etLastName = findViewById(R.id.et_last_name)
+        etExtName = findViewById(R.id.et_ext_name)
+        etIpNumber = findViewById(R.id.et_ip_number)
+        etProgram = findViewById(R.id.et_program)
+        etUsername = findViewById(R.id.et_username)
+        etAddress = findViewById(R.id.et_address)
+
         val btnLogin = findViewById<Button>(R.id.btn_login)
         val tvToggle = findViewById<TextView>(R.id.tv_toggle_mode)
 
@@ -64,7 +84,15 @@ class StudentAuthActivity : AppCompatActivity() {
         tvToggle.setOnClickListener {
             isSignupMode = !isSignupMode
             if (isSignupMode) {
-                etName.visibility = android.view.View.VISIBLE
+                // Show all signup fields
+                etFirstName.visibility = android.view.View.VISIBLE
+                etMiddleName.visibility = android.view.View.VISIBLE
+                etLastName.visibility = android.view.View.VISIBLE
+                etExtName.visibility = android.view.View.VISIBLE
+                etIpNumber.visibility = android.view.View.VISIBLE
+                etProgram.visibility = android.view.View.VISIBLE
+                etUsername.visibility = android.view.View.VISIBLE
+                etAddress.visibility = android.view.View.VISIBLE
                 scheduleSection.visibility = android.view.View.VISIBLE
                 btnLogin.text = "Sign Up"
                 tvToggle.text = "Already have account? Login"
@@ -74,7 +102,15 @@ class StudentAuthActivity : AppCompatActivity() {
                     addTimeSlotView()
                 }
             } else {
-                etName.visibility = android.view.View.GONE
+                // Hide all signup fields
+                etFirstName.visibility = android.view.View.GONE
+                etMiddleName.visibility = android.view.View.GONE
+                etLastName.visibility = android.view.View.GONE
+                etExtName.visibility = android.view.View.GONE
+                etIpNumber.visibility = android.view.View.GONE
+                etProgram.visibility = android.view.View.GONE
+                etUsername.visibility = android.view.View.GONE
+                etAddress.visibility = android.view.View.GONE
                 scheduleSection.visibility = android.view.View.GONE
                 btnLogin.text = "Login"
                 tvToggle.text = "Don't have account? Sign Up"
@@ -87,7 +123,7 @@ class StudentAuthActivity : AppCompatActivity() {
 
         btnLogin.setOnClickListener {
             if (isSignupMode) {
-                signupStudent(etEmail, etPassword, etName)
+                signupStudent(etEmail, etPassword)
             } else {
                 loginStudent(etEmail, etPassword)
             }
@@ -165,13 +201,30 @@ class StudentAuthActivity : AppCompatActivity() {
         slotData.endTimeEdit.setText(String.format("%02d:%02d", slotData.endHour, slotData.endMinute))
     }
 
-    private fun signupStudent(etEmail: EditText, etPassword: EditText, etName: EditText) {
+    private fun signupStudent(etEmail: EditText, etPassword: EditText) {
         val email = etEmail.text.toString().trim()
         val password = etPassword.text.toString().trim()
-        val name = etName.text.toString().trim()
 
-        if (email.isEmpty() || password.isEmpty() || name.isEmpty()) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
+        // Get all new field values
+        val firstName = etFirstName.text.toString().trim()
+        val middleName = etMiddleName.text.toString().trim()
+        val lastName = etLastName.text.toString().trim()
+        val extName = etExtName.text.toString().trim()
+        val ipNumber = etIpNumber.text.toString().trim()
+        val program = etProgram.text.toString().trim()
+        val username = etUsername.text.toString().trim()
+        val address = etAddress.text.toString().trim()
+
+        // Construct full name
+        val fullName = buildString {
+            append(firstName)
+            if (middleName.isNotEmpty()) append(" $middleName")
+            append(" $lastName")
+            if (extName.isNotEmpty()) append(" $extName")
+        }
+
+        if (email.isEmpty() || password.isEmpty() || firstName.isEmpty() || lastName.isEmpty()) {
+            Toast.makeText(this, "Please fill all required fields", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -202,12 +255,18 @@ class StudentAuthActivity : AppCompatActivity() {
                     val studentData = mapOf(
                         "id" to userId,
                         "email" to email,
-                        "name" to name,
+                        "name" to fullName,
+                        "firstName" to firstName,
+                        "middleName" to middleName,
+                        "lastName" to lastName,
+                        "extName" to extName,
+                        "ipNumber" to ipNumber,
+                        "program" to program,
+                        "username" to username,
+                        "address" to address,
                         "role" to "student",
                         "phone" to "",
-                        "address" to "",
-                        "idNumber" to "",
-                        "username" to name.replace(" ", "").lowercase(),
+                        "idNumber" to ipNumber, // Using IP number as ID number
                         "profilePictureUrl" to "",
                         "createdAt" to System.currentTimeMillis(),
                         "appliedJobs" to emptyList<String>(),
