@@ -14,7 +14,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.workit.workit.R
-import com.workit.workit.adapter.JobAdapter
+import com.workit.workit.adapter.ExpandableJobAdapter
 import com.workit.workit.ui.viewmodel.JobsUiState
 import com.workit.workit.ui.viewmodel.JobsViewModel
 import kotlinx.coroutines.launch
@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 class StudentHomeFragment : Fragment() {
     private val viewModel: JobsViewModel by viewModels()
     private lateinit var jobsRecyclerView: RecyclerView
-    private lateinit var jobAdapter: JobAdapter
+    private lateinit var jobAdapter: ExpandableJobAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,12 +38,19 @@ class StudentHomeFragment : Fragment() {
         jobsRecyclerView = view.findViewById(R.id.jobs_recycler_view)
         jobsRecyclerView.layoutManager = LinearLayoutManager(context)
 
-        jobAdapter = JobAdapter(emptyList()) { job ->
-            val bundle = Bundle().apply {
-                putSerializable("job", job)
+        jobAdapter = ExpandableJobAdapter(
+            emptyList(),
+            onJobClick = { job ->
+                // Job click handled by expand/collapse
+            },
+            onApplyClick = { job ->
+                // Navigate to job details for application
+                val bundle = Bundle().apply {
+                    putSerializable("job", job)
+                }
+                findNavController().navigate(R.id.action_nav_home_to_job_details, bundle)
             }
-            findNavController().navigate(R.id.action_nav_home_to_job_details, bundle)
-        }
+        )
         jobsRecyclerView.adapter = jobAdapter
 
         // Observe UI state
@@ -56,7 +63,6 @@ class StudentHomeFragment : Fragment() {
                             hideLoading()
                             jobAdapter.updateJobs(state.jobs)
                         }
-
                         is JobsUiState.Error -> {
                             hideLoading()
                             showError(state.message)
