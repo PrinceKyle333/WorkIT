@@ -98,22 +98,35 @@ class ExpandableJobAdapter(
 
         private fun formatShift(job: Job): String {
             return try {
-                val start = job.shiftStart.split(":")
-                val end = job.shiftEnd.split(":")
+                val startParts = job.shiftStart.trim().split(":")
+                val endParts = job.shiftEnd.trim().split(":")
 
-                val startHour = start[0].toInt()
-                val startMin = start[1].toInt()
-                val endHour = end[0].toInt()
-                val endMin = end[1].toInt()
+                if (startParts.size != 2 || endParts.size != 2) {
+                    return "Shift: ${job.shift}"
+                }
 
-                val startAMPM = if (startHour >= 12) "pm" else "am"
-                val endAMPM = if (endHour >= 12) "pm" else "am"
+                val startHour = startParts[0].toIntOrNull() ?: 0
+                val startMin = startParts[1].toIntOrNull() ?: 0
+                val endHour = endParts[0].toIntOrNull() ?: 0
+                val endMin = endParts[1].toIntOrNull() ?: 0
 
-                val start12 = if (startHour == 0) 12 else if (startHour > 12) startHour - 12 else startHour
-                val end12 = if (endHour == 0) 12 else if (endHour > 12) endHour - 12 else endHour
+                val startAMPM = if (startHour >= 12) "PM" else "AM"
+                val endAMPM = if (endHour >= 12) "PM" else "AM"
 
-                "Shift: Monday ${start12}:${String.format("%02d", startMin)} $startAMPM - ${end12}:${String.format("%02d", endMin)} $endAMPM"
+                val start12 = when {
+                    startHour == 0 -> 12
+                    startHour > 12 -> startHour - 12
+                    else -> startHour
+                }
+                val end12 = when {
+                    endHour == 0 -> 12
+                    endHour > 12 -> endHour - 12
+                    else -> endHour
+                }
+
+                "Shift: $start12:${String.format("%02d", startMin)} $startAMPM - $end12:${String.format("%02d", endMin)} $endAMPM"
             } catch (e: Exception) {
+                android.util.Log.e("JobAdapter", "Error formatting shift", e)
                 "Shift: ${job.shift}"
             }
         }

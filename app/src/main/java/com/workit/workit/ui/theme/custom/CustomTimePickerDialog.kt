@@ -12,7 +12,6 @@ import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import com.workit.workit.R
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -76,7 +75,7 @@ class TimePickerView @JvmOverloads constructor(
         // Draw outer circle
         canvas.drawCircle(centerX, centerY, radius, circlePaint)
 
-        // Draw numbers (12, 3, 6, 9 or 0-59 for minutes)
+        // Draw numbers
         if (isSelectingHour) {
             drawHourNumbers(canvas, centerX, centerY, radius)
         } else {
@@ -91,18 +90,16 @@ class TimePickerView @JvmOverloads constructor(
     }
 
     private fun drawHourNumbers(canvas: Canvas, centerX: Float, centerY: Float, radius: Float) {
-        for (h in 0..11) {
+        for (h in 1..12) {
             val angle = (h * 30 - 90).toDouble() * Math.PI / 180
             val x = centerX + radius * 0.7f * cos(angle).toFloat()
             val y = centerY + radius * 0.7f * sin(angle).toFloat()
 
-            val displayHour = if (h == 0) 12 else h
-
-            if (h == hour % 12) {
+            if (h == hour) {
                 canvas.drawCircle(x, y, 35f, selectedBgPaint)
-                canvas.drawText(displayHour.toString(), x, y + 15f, selectedNumberPaint)
+                canvas.drawText(h.toString(), x, y + 15f, selectedNumberPaint)
             } else {
-                canvas.drawText(displayHour.toString(), x, y + 15f, textPaint)
+                canvas.drawText(h.toString(), x, y + 15f, textPaint)
             }
         }
     }
@@ -149,8 +146,8 @@ class TimePickerView @JvmOverloads constructor(
                 angle = (angle + 90 + 360) % 360
 
                 if (isSelectingHour) {
-                    hour = ((angle / 30).toInt()) % 12
-                    if (hour == 0) hour = 12
+                    val newHour = ((angle / 30).toInt()) % 12
+                    hour = if (newHour == 0) 12 else newHour
                 } else {
                     minute = ((angle / 6).toInt()) % 60
                 }
@@ -163,7 +160,7 @@ class TimePickerView @JvmOverloads constructor(
     }
 
     fun setTime(hour: Int, minute: Int) {
-        this.hour = hour
+        this.hour = if (hour == 0) 12 else if (hour > 12) hour - 12 else hour
         this.minute = minute
         invalidate()
     }
@@ -194,6 +191,10 @@ class CustomTimePickerDialog(
     private lateinit var tvHourMinute: TextView
     private lateinit var btnConfirm: Button
     private lateinit var btnCancel: Button
+    private lateinit var btnAM: Button
+    private lateinit var btnPM: Button
+
+    private var isAM = initialHour < 12
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -203,7 +204,7 @@ class CustomTimePickerDialog(
             orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(
                 800, // width
-                900  // height
+                950  // height - increased for AM/PM buttons
             )
             setPadding(20, 20, 20, 20)
             setBackgroundColor(Color.WHITE)
@@ -236,20 +237,68 @@ class CustomTimePickerDialog(
         }
 
         tvHourMinute = TextView(context).apply {
-            text = String.format("%02d:%02d", initialHour, initialMinute)
-            textSize = 32f
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply {
                 bottomMargin = 16
             }
+            textSize = 32f
             setTextColor(Color.parseColor("#4CAF50"))
         }
 
+        // AM/PM Toggle Buttons
+        val amPmLayout = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = 16
+            }
+        }
+
+        btnAM = Button(context).apply {
+            text = "AM"
+            layoutParams = LinearLayout.LayoutParams(
+                0,
+                48,
+                1f
+            ).apply {
+                rightMargin = 4
+            }
+            setTextColor(Color.WHITE)
+            setOnClickListener {
+                isAM = true
+                updateAMPMButtons()
+                updateTimeDisplay()
+            }
+        }
+
+        btnPM = Button(context).apply {
+            text = "PM"
+            layoutParams = LinearLayout.LayoutParams(
+                0,
+                48,
+                1f
+            ).apply {
+                leftMargin = 4
+            }
+            setTextColor(Color.WHITE)
+            setOnClickListener {
+                isAM = false
+                updateAMPMButtons()
+                updateTimeDisplay()
+            }
+        }
+
+        amPmLayout.addView(btnAM)
+        amPmLayout.addView(btnPM)
+
         // Time Picker View
         timePickerView = TimePickerView(context).apply {
-            setTime(initialHour, initialMinute)
+            val display12Hour = if (initialHour == 0) 12 else if (initialHour > 12) initialHour - 12 else initialHour
+            setTime(display12Hour, initialMinute)
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 500
@@ -343,9 +392,17 @@ class CustomTimePickerDialog(
             setBackgroundColor(Color.parseColor("#4CAF50"))
             setTextColor(Color.WHITE)
             setOnClickListener {
-                initialHour = timePickerView.getHour()
-                initialMinute = timePickerView.getMinute()
-                onTimeSelected(initialHour, initialMinute)
+                val selectedHour = timePickerView.getHour()
+                val selectedMinute = timePickerView.getMinute()
+
+                // Convert to 24-hour format
+                val hour24 = when {
+                    isAM && selectedHour == 12 -> 0
+                    !isAM && selectedHour != 12 -> selectedHour + 12
+                    else -> selectedHour
+                }
+
+                onTimeSelected(hour24, selectedMinute)
                 dismiss()
             }
         }
@@ -357,17 +414,34 @@ class CustomTimePickerDialog(
         rootLayout.addView(tvTitle)
         rootLayout.addView(tvTime)
         rootLayout.addView(tvHourMinute)
+        rootLayout.addView(amPmLayout)
         rootLayout.addView(timePickerView)
         rootLayout.addView(modeButtonsLayout)
         rootLayout.addView(buttonsLayout)
 
         setContentView(rootLayout)
 
-        // Update time display
+        // Initialize AM/PM buttons and display
+        isAM = initialHour < 12
+        updateAMPMButtons()
         updateTimeDisplay()
     }
 
+    private fun updateAMPMButtons() {
+        if (isAM) {
+            btnAM.setBackgroundColor(Color.parseColor("#4CAF50"))
+            btnPM.setBackgroundColor(Color.parseColor("#CCCCCC"))
+        } else {
+            btnAM.setBackgroundColor(Color.parseColor("#CCCCCC"))
+            btnPM.setBackgroundColor(Color.parseColor("#4CAF50"))
+        }
+    }
+
     private fun updateTimeDisplay() {
-        tvHourMinute.text = String.format("%02d:%02d", timePickerView.getHour(), timePickerView.getMinute())
+        val hour = timePickerView.getHour()
+        val minute = timePickerView.getMinute()
+        val amPmText = if (isAM) "AM" else "PM"
+
+        tvHourMinute.text = String.format("%d:%02d %s", hour, minute, amPmText)
     }
 }

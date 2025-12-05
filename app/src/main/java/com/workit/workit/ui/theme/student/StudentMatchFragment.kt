@@ -11,18 +11,33 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.workit.workit.R
+import com.workit.workit.adapter.ExpandableJobAdapter
 import com.workit.workit.data.Application
+import com.workit.workit.data.Job
+import com.workit.workit.data.Student
+import com.workit.workit.data.TimeSlot
+import com.workit.workit.utils.JobMatchingUtils
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class StudentMatchFragment : Fragment() {
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
+
     private lateinit var matchesRecyclerView: RecyclerView
     private lateinit var tvEmptyMessage: TextView
+    private lateinit var jobAdapter: ExpandableJobAdapter
+
+    // Section titles
+    private lateinit var tvMatchingJobsTitle: TextView
+    private lateinit var tvApplicationsTitle: TextView
     private lateinit var applicationsContainer: LinearLayout
 
     override fun onCreateView(
@@ -39,23 +54,140 @@ class StudentMatchFragment : Fragment() {
         matchesRecyclerView = view.findViewById(R.id.matches_recycler_view)
         tvEmptyMessage = view.findViewById(R.id.tv_empty_message)
 
+        // Find new views for section titles
+        tvMatchingJobsTitle = view.findViewById(R.id.tv_matching_jobs_title)
+        tvApplicationsTitle = view.findViewById(R.id.tv_applications_title)
+        applicationsContainer = view.findViewById(R.id.applications_container)
+
         matchesRecyclerView.layoutManager = LinearLayoutManager(context)
 
-        // Create a container for applications
-        applicationsContainer = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            layoutParams = RecyclerView.LayoutParams(
-                RecyclerView.LayoutParams.MATCH_PARENT,
-                RecyclerView.LayoutParams.WRAP_CONTENT
-            )
-        }
+        jobAdapter = ExpandableJobAdapter(
+            emptyList(),
+            onJobClick = { job ->
+                // Job click handled by expand/collapse
+            },
+            onApplyClick = { job ->
+                // Navigate to job details for application
+                val bundle = Bundle().apply {
+                    putSerializable("job", job)
+                }
+                findNavController().navigate(R.id.action_nav_home_to_job_details, bundle)
+            }
+        )
+        matchesRecyclerView.adapter = jobAdapter
 
+        loadMatchingJobsAndApplications()
+    }
+
+    private fun loadMatchingJobsAndApplications() {
         val studentId = auth.currentUser?.uid ?: return
-        loadStudentApplications(studentId)
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // Load matching jobs
+                loadMatchingJobs(studentId)
+
+                // Load applications
+                loadStudentApplications(studentId)
+
+            } catch (e: Exception) {
+                Toast.makeText(context, "Error loading data: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private suspend fun loadMatchingJobs(studentId: String) {
+        try {
+            // Get student data with schedule
+            val studentDoc = db.collection("students")
+                .document(studentId)
+                .get()
+                .await()
+
+            if (!studentDoc.exists()) {
+                showNoScheduleMessage()
+                return
+            }
+
+            // Parse vacant schedule safely
+            val vacantScheduleData = studentDoc.get("vacantSchedule") as? List<*>
+            val vacantSchedule = vacantScheduleData?.mapNotNull { item ->
+                try {
+                    val map = item as? Map<*, *>
+                    TimeSlot(
+                        day = map?.get("day") as? String ?: "",
+                        startTime = map?.get("startTime") as? String ?: "",
+                        endTime = map?.get("endTime") as? String ?: ""
+                    )
+                } catch (e: Exception) {
+                    null
+                }
+            } ?: emptyList()
+
+            if (vacantSchedule.isEmpty()) {
+                showNoScheduleMessage()
+                return
+            }
+
+            // Create student object
+            val student = Student(
+                id = studentId,
+                name = studentDoc.getString("name") ?: "",
+                email = studentDoc.getString("email") ?: "",
+                vacantSchedule = vacantSchedule
+            )
+
+            // Get all active jobs
+            val jobsSnapshot = db.collection("jobs")
+                .whereEqualTo("status", "active")
+                .get()
+                .await()
+
+            val allJobs = jobsSnapshot.documents.mapNotNull { doc ->
+                try {
+                    Job(
+                        id = doc.id,
+                        employer = doc.getString("employer") ?: "",
+                        employerId = doc.getString("employerId") ?: "",
+                        position = doc.getString("position") ?: "",
+                        location = doc.getString("location") ?: "",
+                        shift = doc.getString("shift") ?: "",
+                        shiftStart = doc.getString("shiftStart") ?: "",
+                        shiftEnd = doc.getString("shiftEnd") ?: "",
+                        workDays = doc.get("workDays") as? List<String> ?: emptyList(),
+                        description = doc.getString("description") ?: "",
+                        requirements = doc.get("requirements") as? List<String> ?: emptyList(),
+                        imageUrl = doc.getString("imageUrl") ?: "",
+                        postedAt = doc.getLong("postedAt") ?: System.currentTimeMillis(),
+                        status = doc.getString("status") ?: "active",
+                        latitude = doc.getDouble("latitude") ?: 0.0,
+                        longitude = doc.getDouble("longitude") ?: 0.0
+                    )
+                } catch (e: Exception) {
+                    android.util.Log.e("StudentMatch", "Error parsing job", e)
+                    null
+                }
+            }
+
+            // Filter for matching jobs
+            val matchingJobs = allJobs.filter { job ->
+                JobMatchingUtils.isJobMatchingStudentSchedule(job, student)
+            }
+
+            if (matchingJobs.isEmpty()) {
+                showNoMatchingJobsMessage()
+            } else {
+                showMatchingJobs(matchingJobs)
+            }
+
+        } catch (e: Exception) {
+            android.util.Log.e("StudentMatch", "Error loading matching jobs", e)
+            showNoScheduleMessage()
+        }
     }
 
     private fun loadStudentApplications(studentId: String) {
-        db.collection("applications")
+        db.collection("matches")
             .whereEqualTo("studentId", studentId)
             .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
             .addSnapshotListener { documents, error ->
@@ -67,16 +199,14 @@ class StudentMatchFragment : Fragment() {
                 applicationsContainer.removeAllViews()
 
                 if (documents == null || documents.isEmpty) {
-                    tvEmptyMessage.visibility = View.VISIBLE
-                    matchesRecyclerView.visibility = View.GONE
+                    tvApplicationsTitle.visibility = View.GONE
                     return@addSnapshotListener
                 }
 
-                tvEmptyMessage.visibility = View.GONE
-                matchesRecyclerView.visibility = View.VISIBLE
+                tvApplicationsTitle.visibility = View.VISIBLE
 
                 documents.forEach { doc ->
-                    val application = Application(
+                    val match = com.workit.workit.data.Match(
                         id = doc.id,
                         jobId = doc.getString("jobId") ?: "",
                         studentId = doc.getString("studentId") ?: "",
@@ -84,28 +214,37 @@ class StudentMatchFragment : Fragment() {
                         employerName = doc.getString("employerName") ?: "",
                         position = doc.getString("position") ?: "",
                         status = doc.getString("status") ?: "pending",
-                        resumeUrl = doc.getString("resumeUrl") ?: "",
-                        corUrl = doc.getString("corUrl") ?: "",
-                        applicationLetterUrl = doc.getString("applicationLetterUrl") ?: "",
                         createdAt = doc.getLong("createdAt") ?: 0L
                     )
 
-                    val applicationView = createApplicationView(application)
+                    val applicationView = createApplicationView(match)
                     applicationsContainer.addView(applicationView)
-                }
-
-                matchesRecyclerView.adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-                    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-                        return object : RecyclerView.ViewHolder(applicationsContainer) {}
-                    }
-
-                    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {}
-                    override fun getItemCount() = 1
                 }
             }
     }
 
-    private fun createApplicationView(application: Application): View {
+    private fun showMatchingJobs(jobs: List<Job>) {
+        tvMatchingJobsTitle.visibility = View.VISIBLE
+        tvEmptyMessage.visibility = View.GONE
+        matchesRecyclerView.visibility = View.VISIBLE
+        jobAdapter.updateJobs(jobs)
+    }
+
+    private fun showNoScheduleMessage() {
+        tvMatchingJobsTitle.visibility = View.GONE
+        tvEmptyMessage.visibility = View.VISIBLE
+        tvEmptyMessage.text = "Set your vacant schedule in Profile to see matching jobs"
+        matchesRecyclerView.visibility = View.GONE
+    }
+
+    private fun showNoMatchingJobsMessage() {
+        tvMatchingJobsTitle.visibility = View.VISIBLE
+        tvEmptyMessage.visibility = View.VISIBLE
+        tvEmptyMessage.text = "No jobs match your schedule right now.\nCheck back later or update your vacant times in Profile."
+        matchesRecyclerView.visibility = View.GONE
+    }
+
+    private fun createApplicationView(match: com.workit.workit.data.Match): View {
         val view = layoutInflater.inflate(R.layout.item_match, applicationsContainer, false)
 
         val tvEmployerName = view.findViewById<TextView>(R.id.tv_employer_name)
@@ -114,11 +253,11 @@ class StudentMatchFragment : Fragment() {
         val btnAccept = view.findViewById<Button>(R.id.btn_accept)
         val btnReject = view.findViewById<Button>(R.id.btn_reject)
 
-        tvEmployerName.text = application.employerName
-        tvJobPosition.text = application.position
+        tvEmployerName.text = match.employerName
+        tvJobPosition.text = match.position
 
         // Update status display
-        when (application.status) {
+        when (match.status) {
             "pending" -> {
                 tvStatus.text = "Status: Pending Review"
                 tvStatus.setTextColor(resources.getColor(R.color.orange, null))
@@ -133,78 +272,9 @@ class StudentMatchFragment : Fragment() {
             }
         }
 
-        // Hide accept/reject buttons and replace with document view buttons
+        // Hide accept/reject buttons for students
         btnAccept.visibility = View.GONE
         btnReject.visibility = View.GONE
-
-        // Add document viewing section
-        val documentLayout = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(0, 16, 0, 0)
-        }
-
-        val tvDocumentsLabel = TextView(context).apply {
-            text = "Submitted Documents:"
-            textSize = 12f
-            setTextColor(resources.getColor(R.color.gray, null))
-            setPadding(0, 0, 0, 8)
-        }
-        documentLayout.addView(tvDocumentsLabel)
-
-        // View Resume button
-        val btnViewResume = Button(context).apply {
-            text = "View My Resume"
-            textSize = 11f
-            setBackgroundResource(R.drawable.bg_btn_blue)
-            setTextColor(resources.getColor(R.color.white, null))
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                setMargins(0, 0, 0, 8)
-            }
-            setOnClickListener {
-                openDocument(application.resumeUrl)
-            }
-        }
-
-        // View COR button
-        val btnViewCor = Button(context).apply {
-            text = "View My COR"
-            textSize = 11f
-            setBackgroundResource(R.drawable.bg_btn_blue)
-            setTextColor(resources.getColor(R.color.white, null))
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                setMargins(0, 0, 0, 8)
-            }
-            setOnClickListener {
-                openDocument(application.corUrl)
-            }
-        }
-
-        // View Application Letter button
-        val btnViewLetter = Button(context).apply {
-            text = "View My Application Letter"
-            textSize = 11f
-            setBackgroundResource(R.drawable.bg_btn_blue)
-            setTextColor(resources.getColor(R.color.white, null))
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-            setOnClickListener {
-                openDocument(application.applicationLetterUrl)
-            }
-        }
-
-        documentLayout.addView(btnViewResume)
-        documentLayout.addView(btnViewCor)
-        documentLayout.addView(btnViewLetter)
-
-        (view as LinearLayout).addView(documentLayout)
 
         return view
     }
@@ -224,5 +294,11 @@ class StudentMatchFragment : Fragment() {
         } catch (e: Exception) {
             Toast.makeText(context, "Cannot open document: ${e.message}", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Reload when fragment becomes visible
+        loadMatchingJobsAndApplications()
     }
 }

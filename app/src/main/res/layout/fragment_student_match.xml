@@ -1,32 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/light_gray">
+    android:background="@color/light_gray"
+    android:fillViewport="true">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="My Applications"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:padding="16dp" />
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tv_empty_message"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="No applications yet.\n\nClick on a job to apply now!"
-        android:textSize="16sp"
-        android:textColor="@color/gray"
-        android:gravity="center"
-        android:visibility="gone" />
+        <!-- SECTION 1: MATCHING JOBS -->
+        <TextView
+            android:id="@+id/tv_matching_jobs_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Jobs Matching Your Schedule"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:padding="16dp"
+            android:visibility="visible" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/matches_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:padding="8dp" />
-</LinearLayout>
+        <!-- Empty State Message -->
+        <TextView
+            android:id="@+id/tv_empty_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Set your vacant schedule in Profile to see matching jobs"
+            android:textSize="14sp"
+            android:textColor="@color/gray"
+            android:gravity="center"
+            android:padding="32dp"
+            android:visibility="gone" />
+
+        <!-- Matching Jobs RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/matches_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            android:padding="8dp" />
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:background="@color/gray_bg"
+            android:layout_marginTop="16dp" />
+
+        <!-- SECTION 2: YOUR APPLICATIONS -->
+        <TextView
+            android:id="@+id/tv_applications_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your Applications"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:padding="16dp"
+            android:visibility="gone" />
+
+        <!-- Applications Container -->
+        <LinearLayout
+            android:id="@+id/applications_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="16dp" />
+
+    </LinearLayout>
+</ScrollView>
