@@ -14,6 +14,7 @@ import com.workit.workit.R
 import com.workit.workit.auth.RoleManager
 import com.workit.workit.data.TimeSlot
 import com.workit.workit.ui.theme.custom.CustomTimePickerDialog
+import com.workit.workit.utils.TimeFormatUtils
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
@@ -27,6 +28,7 @@ class ProfileFragment : Fragment() {
     private lateinit var tvDisplayEmail: TextView
     private lateinit var tvDisplayLocation: TextView
     private lateinit var tvPhoneValue: TextView
+    private lateinit var tvVacantSchedule: TextView
     private lateinit var btnEdit: Button
     private lateinit var btnLogout: Button
 
@@ -222,13 +224,11 @@ class ProfileFragment : Fragment() {
             daySpinner.setSelection(dayIndex)
         }
 
-        // Parse times
-        val startParts = defaultStartTime.split(":")
-        val endParts = defaultEndTime.split(":")
-        val startHour = startParts.getOrNull(0)?.toIntOrNull() ?: 9
-        val startMinute = startParts.getOrNull(1)?.toIntOrNull() ?: 0
-        val endHour = endParts.getOrNull(0)?.toIntOrNull() ?: 17
-        val endMinute = endParts.getOrNull(1)?.toIntOrNull() ?: 0
+        // Parse times using TimeFormatUtils
+        val startHour = TimeFormatUtils.parseHour(defaultStartTime)
+        val startMinute = TimeFormatUtils.parseMinute(defaultStartTime)
+        val endHour = TimeFormatUtils.parseHour(defaultEndTime)
+        val endMinute = TimeFormatUtils.parseMinute(defaultEndTime)
 
         val slotData = TimeSlotView(
             view = timeSlotView,
@@ -242,7 +242,7 @@ class ProfileFragment : Fragment() {
             endMinute = endMinute
         )
 
-        // Set times
+        // Set times using uniform format
         updateTimeDisplay(slotData)
 
         // Setup time pickers
@@ -287,8 +287,12 @@ class ProfileFragment : Fragment() {
     }
 
     private fun updateTimeDisplay(slotData: TimeSlotView) {
-        slotData.startTimeEdit.setText(String.format("%02d:%02d", slotData.startHour, slotData.startMinute))
-        slotData.endTimeEdit.setText(String.format("%02d:%02d", slotData.endHour, slotData.endMinute))
+        // UNIFORM FORMAT: Use TimeFormatUtils for storage format
+        val startTime = TimeFormatUtils.formatToStorage(slotData.startHour, slotData.startMinute)
+        val endTime = TimeFormatUtils.formatToStorage(slotData.endHour, slotData.endMinute)
+
+        slotData.startTimeEdit.setText(startTime)
+        slotData.endTimeEdit.setText(endTime)
     }
 
     private fun saveProfileToFirebase(
@@ -323,12 +327,12 @@ class ProfileFragment : Fragment() {
             if (extName.isNotEmpty()) append(" $extName")
         }
 
-        // Convert time slots to data model
+        // Convert time slots to data model using UNIFORM FORMAT
         val vacantSchedule = timeSlots.map { slot ->
             mapOf(
                 "day" to slot.daySpinner.selectedItem.toString(),
-                "startTime" to String.format("%02d:%02d", slot.startHour, slot.startMinute),
-                "endTime" to String.format("%02d:%02d", slot.endHour, slot.endMinute)
+                "startTime" to TimeFormatUtils.formatToStorage(slot.startHour, slot.startMinute),
+                "endTime" to TimeFormatUtils.formatToStorage(slot.endHour, slot.endMinute)
             )
         }
 

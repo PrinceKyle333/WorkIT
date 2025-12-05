@@ -9,6 +9,7 @@ import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
 import com.workit.workit.R
 import com.workit.workit.data.Job
+import com.workit.workit.utils.TimeFormatUtils
 import com.squareup.picasso.Picasso
 import java.text.SimpleDateFormat
 import java.util.*
@@ -50,7 +51,10 @@ class ExpandableJobAdapter(
             tvEmployer.text = job.employer
             tvLocationBadge.text = "Location: ${job.location}"
             tvPosition.text = "Position: ${job.position}"
-            tvShift.text = formatShift(job)
+
+            // UNIFORM FORMAT: Use TimeFormatUtils for shift display
+            tvShift.text = formatShiftUniform(job)
+
             tvLocation.text = job.location
             tvTimePosted.text = getTimeAgo(job.postedAt)
 
@@ -96,37 +100,22 @@ class ExpandableJobAdapter(
             }
         }
 
-        private fun formatShift(job: Job): String {
+        /**
+         * UNIFORM FORMAT: Format shift using TimeFormatUtils
+         */
+        private fun formatShiftUniform(job: Job): String {
             return try {
-                val startParts = job.shiftStart.trim().split(":")
-                val endParts = job.shiftEnd.trim().split(":")
-
-                if (startParts.size != 2 || endParts.size != 2) {
-                    return "Shift: ${job.shift}"
+                // Get day from workDays or default to Monday
+                val day = if (job.workDays.isNotEmpty()) {
+                    job.workDays[0]
+                } else {
+                    "Monday"
                 }
 
-                val startHour = startParts[0].toIntOrNull() ?: 0
-                val startMin = startParts[1].toIntOrNull() ?: 0
-                val endHour = endParts[0].toIntOrNull() ?: 0
-                val endMin = endParts[1].toIntOrNull() ?: 0
-
-                val startAMPM = if (startHour >= 12) "PM" else "AM"
-                val endAMPM = if (endHour >= 12) "PM" else "AM"
-
-                val start12 = when {
-                    startHour == 0 -> 12
-                    startHour > 12 -> startHour - 12
-                    else -> startHour
-                }
-                val end12 = when {
-                    endHour == 0 -> 12
-                    endHour > 12 -> endHour - 12
-                    else -> endHour
-                }
-
-                "Shift: $start12:${String.format("%02d", startMin)} $startAMPM - $end12:${String.format("%02d", endMin)} $endAMPM"
+                // Use TimeFormatUtils for consistent formatting
+                TimeFormatUtils.formatShiftDisplay(day, job.shiftStart, job.shiftEnd)
             } catch (e: Exception) {
-                android.util.Log.e("JobAdapter", "Error formatting shift", e)
+                // Fallback to raw shift string
                 "Shift: ${job.shift}"
             }
         }

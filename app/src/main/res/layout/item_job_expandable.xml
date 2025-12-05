@@ -272,13 +272,28 @@
                         android:layout_marginBottom="12dp" />
 
                     <!-- Shift Details -->
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Shift: Monday 5:00 pm - 7:00 pm"
-                        android:textSize="14sp"
-                        android:textColor="@color/gray"
-                        android:layout_marginBottom="12dp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp">
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_briefcase"
+                            android:tint="@color/gray"
+                            android:layout_marginEnd="6dp" />
+
+                        <TextView
+                            android:id="@+id/tv_shift_expanded"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Shift: Monday 5:00 pm - 7:00 pm"
+                            android:textSize="14sp"
+                            android:textColor="@color/gray" />
+                    </LinearLayout>
 
                     <!-- Requirements Section -->
                     <TextView
